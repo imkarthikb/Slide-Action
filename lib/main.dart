@@ -15,56 +15,53 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget{
+class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> implements SlideActionCallback {
+class _MyHomePageState extends State<MyHomePage>
+    implements SlideActionCallback {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: SlideAction(slideActionCallback: this),
-    )
-    );
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Center(
+          child: SlideAction(slideActionCallback: onSlideComplete),
+        ));
   }
 
-  @override
-  onSlideComplete(){
+  onSlideComplete() {
     print("Slide completed");
   }
 }
 
 class SlideAction extends StatefulWidget {
   final ValueChanged<double> valueChanged;
-  final SlideActionCallback slideActionCallback;
+  final Function slideActionCallback;
 
-  SlideAction({this.valueChanged, @Key("slideActionCallback") this.slideActionCallback});
+  SlideAction(
+      {this.valueChanged,
+      @Key("slideActionCallback") this.slideActionCallback});
 
   @override
   SliderState createState() {
     return new SliderState();
   }
 
-  slideActionComplete(){
-    slideActionCallback.onSlideComplete();
+  slideActionComplete() {
+    slideActionCallback();
   }
 }
 
 class SliderState extends State<SlideAction> {
   ValueNotifier<double> valueListener = ValueNotifier(.0);
   static const SLIDE_THRESHOLD = 0.9;
-  
+
   @override
   void initState() {
     valueListener.addListener(notifyParent);
@@ -77,8 +74,11 @@ class SliderState extends State<SlideAction> {
     }
   }
 
-  void notifySlideActionComplete(){
-      widget.slideActionCallback.onSlideComplete();
+  void notifySlideActionComplete() {
+    widget.slideActionCallback();
+    Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text("Slide complete"),
+    ));
   }
 
   @override
@@ -106,7 +106,7 @@ class SliderState extends State<SlideAction> {
                       if (valueListener.value >= 0.9) {
                         valueListener.value = 0.toDouble();
                         notifySlideActionComplete();
-                      }else{
+                      } else {
                         valueListener.value = 0.toDouble();
                       }
                     },
@@ -151,6 +151,6 @@ class SliderState extends State<SlideAction> {
   }
 }
 
-abstract class SlideActionCallback{
+abstract class SlideActionCallback {
   onSlideComplete();
 }
